@@ -8,7 +8,13 @@ module.exports = function (req, res, next) {
     const data = jwt.verify(token, process.env.JWT_SECRET);
     req.user = data;
     next();
-  } catch {
-    res.sendStatus(403);
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res
+        .status(401)
+        .json({ error: "Session expired. Please login again." });
+    }
+
+    return res.status(403).json({ error: "Invalid token" });
   }
 };
